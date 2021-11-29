@@ -4,13 +4,13 @@ public class CityNode {
         int y;
         int pos;
 
-        //
+// the constructor
         public CityNode(int x, int y, int pos) {
             this.x = x;
             this.y = y;
             this.pos = pos;
         }
-
+    //        getters and setters
         public int getX() {
             return x;
         }
@@ -18,6 +18,8 @@ public class CityNode {
         public int getY() {
             return y;
         }
+
+
     public void setX(int x) {
         this.x = x;
     }

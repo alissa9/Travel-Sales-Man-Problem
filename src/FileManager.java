@@ -4,35 +4,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-
+/* reading the file */
 public class FileManager {
     File file;
     List<CityNode> nodes;
     int[] cities;
 
-
+/* class constructor */
     public FileManager(File file){
         this.file = file;
         this.nodes = new ArrayList<>();
 
     }
-
+/* adding city positions into an array */
     public void populateCities(){
         cities = new int[nodes.size()];
         for (int i = 0; i < cities.length; i++) {
             cities[i] = nodes.get(i).getPos();
         }
     }
-
+/* reading file data */
     public void readFileData() {
-
-
         Scanner myReader;
         try {
             myReader = new Scanner(this.file);
-
             while (myReader.hasNextLine()) {
                 String lines = myReader.nextLine();
+                //using Regex to replace extra spaces and tabs with a single space
                 String[] rows = lines.trim().replaceAll("( )+", " ").replaceAll("\t"," ").split(" ");
 
                 int cityNum = Integer.parseInt(rows[0]);
@@ -51,7 +49,7 @@ public class FileManager {
 
 
 
-    // GETTERS / SETTERS
+    /* getters and setters methods */
     public File getFile() {
         return file;
     }
