@@ -7,121 +7,118 @@ to get the shortest distance from the paths generated*/
 
 public class Main {
     /* to pass in the file for the program by uncommenting the required one */
-    private final String FILENAME = "test1tsp.txt";
-//    private final String FILENAME = "test2atsp.txt";
+//    private static final String FILENAME = "test1tsp.txt";
+//    private static final String FILENAME = "test2atsp.txt";
 //    private final String FILENAME = "test3atsp.txt";
-//    private final String FILENAME = "test1-20.txt";
+    private static final String FILENAME = "test1-20.txt";
 //    private final String FILENAME = "test2-20.txt";
 //    private final String FILENAME = "test3-20.txt";
 
     public static void main(String[] args) {
 
-        try {
-            List<Node> nodes = readFileData(new File("test2atsp.txt"));
-            int[] intArr = {1, 2, 3, 4, 5, 6, 7, 8};
-            List<Double> distances = new ArrayList<>();
-            List<String> routes = new ArrayList<>();
-            permute(intArr, 0, nodes, distances, routes);
-            /* Getting the shortest distance from the permute function */
-            int index = distances.indexOf(Collections.min(distances));
-            System.out.println("File Name -> " );
-            System.out.println("Route -> " + routes.get(index));
-            System.out.println("Shortest Distance  -> " + (Collections.min(distances)));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        List<Double> distances = new ArrayList<>();
+        List<String> routes = new ArrayList<>();
+
+        long startTime = System.currentTimeMillis();
+
+        FileManager manager = new FileManager(new File(FILENAME));
+        manager.readFileData();
+        manager.populateCities();
+
+        permute(manager.getCities(), 0,manager.getNodes(),distances,routes);
+        int index = distances.indexOf(Collections.min(distances));
+
+
+        long endTime = System.currentTimeMillis() - startTime;
+
+
+        printResults(distances, routes, index,manager.getFile(), endTime);
+
 
     }
 
 
-    // Reading the txt file then separating and storing the values
-    private static List<Node> readFileData(File file) throws FileNotFoundException {
-        List<Node> nodes = new ArrayList<>();
-        Scanner myReader = new Scanner(file);
-        while (myReader.hasNextLine()) {
-            String lines = myReader.nextLine();
-            String[] rows = lines
-                    .trim()
-                    .replaceAll("( )+", " ")
-                    .split(" ");
-            /* the first row of the txt file which is the city number */
-            int cityNum = Integer.parseInt(rows[0]);
+    private static void printResults(List<Double> distances, List<String> routes, int index, File file, long endTime) {
+        System.out.println("Test file name -> " + file.getName());
+        System.out.println("Shortest Route -> " + routes.get(index));
+        System.out.println("Distance  -> " + (Collections.min(distances)));
+        System.out.println("Time taken  -> " + endTime + "  ms");
 
-            /* the second row of the txt file which is the x coordinates */
-            int cityX = Integer.parseInt(rows[1]);
-
-            /* the second row of the txt file which is the y coordinates */
-            int cityY = Integer.parseInt(rows[2]);
-
-            nodes.add(new Node(cityX, cityY, cityNum));
-        }
-
-        myReader.close();
-        return nodes;
     }
 
-    /*  The Permute method generates all possible routes then I calculate all routes
-       after that I use it to get the shortest distance calculated */
-    public static void permute(int[] route, int start, List<Node> nodes, List<Double> distances, List<String> routes) {
-        double routeDistance = 0;
-        for (int i = start; i < route.length; i++) {
+
+
+
+    public static void permute(int[] route, int start, List<CityNode> nodes, List<Double> distances, List<String> routes) {
+
+        double routDistance = 0;
+        int startNode = route[0];
+
+
+        for(int i = start; i < route.length; i++){
             int temp = route[start];
             route[start] = route[i];
             route[i] = temp;
-            permute(route, start + 1, nodes, distances, routes);
+            permute(route, start + 1,nodes,distances,routes);
             route[i] = route[start];
             route[start] = temp;
 
         }
-        /**/
-        if (start == route.length - 1 && route[0] == 1) {
-            int currentNode;
+        if (start == route.length - 1 && route[0] == startNode) {
+            int currentNode ;
             int nextNode;
+
+
+
             for (int i = 0; i < route.length; i++) {
-                // check if city is last
-                if (i == route.length - 1) {
+
+                if(i == route.length - 1){
                     currentNode = route[i];
                     nextNode = route[0];
-                } else {
+                }else{
                     currentNode = route[i];
                     nextNode = route[i + 1];
+
                 }
-/* Calculating the distance between each 2 cities using euclidean distance formula
- which will give me the distance from city 1 to 2*/
-                int currXCord = nodes.get(currentNode - 1).getX();
-                int currYCord = nodes.get(currentNode - 1).getY();
-                int nextXCord = nodes.get(nextNode - 1).getX();
-                int nextYCord = nodes.get(nextNode - 1).getY();
-                routeDistance += Math.sqrt((nextXCord - currXCord) * (nextXCord - currXCord)
-                        + (nextYCord - currYCord) * (nextYCord - currYCord));
+
+                routDistance = calcDistance(nodes, routDistance, currentNode, nextNode);
+
+
             }
-            distances.add(routeDistance);
-            routes.add(Arrays.toString(route));
+
+            int[] currentRoute = insertCityPos(route, startNode);
+
+
+            distances.add(routDistance);
+            routes.add(Arrays.toString(currentRoute));
 
         }
 
     }
 
-    //
-    public static class Node {
-        int x;
-        int y;
-        int city;
+    private static int[] insertCityPos(int[] route, int startNode) {
+        int[] currentRoute = new int[route.length + 1];
 
-        //
-        public Node(int x, int y, int city) {
-            this.x = x;
-            this.y = y;
-            this.city = city;
+        for (int i = 0; i < route.length + 1; i++){
+            if(i == route.length) currentRoute[i] = startNode;
+            else currentRoute[i] = route[i];
         }
-
-        public int getX() {
-            return x;
-        }
-
-        public int getY() {
-            return y;
-        }
+        return currentRoute;
     }
+
+
+    private static double calcDistance(List<CityNode> nodes, double routDistance, int currentNode, int nextNode) {
+        int currXCoord = (nodes.get(currentNode - 1).getX());
+        int currYCoord = (nodes.get(currentNode - 1).getY());
+
+        int nextXCoord = (nodes.get(nextNode - 1).getX());
+        int nextYCoord = (nodes.get(nextNode - 1).getY());
+
+        routDistance = routDistance
+                +  Math.sqrt((nextXCoord-currXCoord)*(nextXCoord-currXCoord)
+                + (nextYCoord-currYCoord)*(nextYCoord-currYCoord));
+        return routDistance;
+    }
+
 }
 
