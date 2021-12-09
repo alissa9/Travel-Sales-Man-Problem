@@ -7,10 +7,10 @@ to get the shortest distance from the paths generated*/
 public class Main {
     /* to pass in the file for the program by uncommenting the required one */
 
-    private static final String FILENAME = "test1tsp.txt";
+    //    private static final String FILENAME = "test1tsp.txt";
 //    private static final String FILENAME = "test2atsp.txt";
 //    private static  final String FILENAME = "test3atsp.txt";
-//    private static final String FILENAME = "test1-20.txt";
+    private static final String FILENAME = "test1-20.txt";
 //    private static final String FILENAME = "test2-20.txt";
 //    private static final String FILENAME = "test3-20.txt";
 
